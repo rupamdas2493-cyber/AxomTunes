@@ -5,125 +5,156 @@
 
     <style>
         body {
-            font-family: Arial;
-            background: #121212;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #121212, #000);
             color: white;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px;
             text-align: center;
+            background: #181818;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
-        .song-card, .video-card {
-            background:#1e1e1e;
-            margin:10px;
-            padding:10px;
-            border-radius:10px;
-            width:150px;
-            display:inline-block;
-            cursor:pointer;
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* SEARCH */
+        .search-box {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .search-box input {
+            width: 250px;
+            padding: 10px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+        }
+
+        .search-box button {
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            background: #1db954;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* GRID */
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding-bottom: 120px;
+        }
+
+        .card {
+            background: #181818;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            width: 160px;
             transition: 0.3s;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
-        .song-card:hover, .video-card:hover {
-            transform: scale(1.05);
+        .card:hover {
+            transform: translateY(-5px);
+            background: #282828;
         }
 
-        .song-card img, .video-card img {
-            width:100%;
-            border-radius:10px;
+        .card img {
+            width: 100%;
+            border-radius: 10px;
         }
 
+        .card p {
+            font-size: 14px;
+        }
+
+        /* VIDEO */
+        #videoPlayer {
+            text-align: center;
+            margin: 20px;
+        }
+
+        iframe {
+            border-radius: 12px;
+        }
+
+        /* PLAYER */
         .player {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background: #181818;
+            background: rgba(24,24,24,0.95);
+            backdrop-filter: blur(10px);
             padding: 15px;
-        }
-
-        button {
-            padding: 8px;
-            margin: 5px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
+            text-align: center;
         }
 
         .controls button {
             background: #1db954;
+            border: none;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 50%;
             color: white;
+            cursor: pointer;
         }
 
         #progress {
-            width: 80%;
+            width: 60%;
         }
 
-        input {
-            padding:10px;
-            border-radius:5px;
-            border:none;
-            margin:10px;
-        }
-
-        #videoPlayer {
-            margin-top: 20px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: #aaa;
-            margin-top: -10px;
-        }
     </style>
 </head>
 
 <body>
 
-<h1>🎧 Zubeen Garg MP3 Player</h1>
-<p class="subtitle">Dedicated to Zubeen Da ❤️</p>
+<div class="header">
+    <h1>🎧 Zubeen Garg MP3 Player</h1>
+    <p class="subtitle">Dedicated to Zubeen Da ❤️</p>
+</div>
 
-<!-- 🔍 ONLINE SEARCH -->
-<form method="POST" action="/search">
-    <input type="text" name="query" placeholder="Search songs (online + local)..." required>
-    <button type="submit">Search</button>
-</form>
+<div class="search-box">
+    <form method="POST" action="/search">
+        <input type="text" name="query" placeholder="Search songs..." required>
+        <button type="submit">Search</button>
+    </form>
+</div>
 
-<!-- 🎬 ONLINE RESULTS -->
-{% if videos %}
-    <h3>🎬 Online Results:</h3>
-
-    <div style="display:flex; flex-wrap:wrap; justify-content:center;">
-        {% for v in videos %}
-            <div class="video-card" onclick="playVideo('{{ v.id }}')">
-                <img src="{{ v.thumbnail }}">
-                <p style="font-size:14px;">{{ v.title }}</p>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-<!-- 🎬 VIDEO PLAYER -->
+<!-- VIDEO -->
 <div id="videoPlayer"></div>
 
-<!-- 🔍 LOCAL SEARCH -->
-<input type="text" id="search" placeholder="Filter local songs..." onkeyup="searchSongs()">
-
-<!-- 🎵 LOCAL SONGS -->
-<h3>🎵 Local Results:</h3>
-
-<div id="songList">
+<!-- SONGS -->
+<div class="grid">
     {% for song in songs %}
-        <div class="song-card"
+        <div class="card"
              onclick="playSong('{{ url_for('get_song', filename=song) }}', '{{ song }}')">
 
             <img src="/static/covers/{{ song.replace('.mp3', '.jpg') }}"
                  onerror="this.src='/static/default.jpg'">
 
             <p>{{ song }}</p>
-
         </div>
     {% endfor %}
 </div>
 
-<!-- 🎧 PLAYER -->
+<!-- PLAYER -->
 <div class="player">
     <h3 id="nowPlaying">No song playing</h3>
 
@@ -139,18 +170,6 @@
 </div>
 
 <script>
-// 🔍 LOCAL SEARCH FILTER
-function searchSongs() {
-    let input = document.getElementById("search").value.toLowerCase();
-    let items = document.querySelectorAll(".song-card");
-
-    items.forEach(item => {
-        let text = item.innerText.toLowerCase();
-        item.style.display = text.includes(input) ? "inline-block" : "none";
-    });
-}
-
-// 🎵 PLAYER LOGIC
 let songs = {{ songs | tojson }};
 let currentIndex = 0;
 let player = document.getElementById("player");
@@ -160,8 +179,7 @@ function playSong(url, name) {
     currentIndex = songs.indexOf(name);
     player.src = url;
     player.play();
-
-    document.getElementById("nowPlaying").innerText = "🎵 Playing: " + name;
+    document.getElementById("nowPlaying").innerText = "🎵 " + name;
 }
 
 function togglePlay() {
@@ -179,24 +197,20 @@ function prevSong() {
     playSong("/songs/" + songs[currentIndex], songs[currentIndex]);
 }
 
-// auto next
 player.addEventListener("ended", nextSong);
 
-// progress update
 player.addEventListener("timeupdate", () => {
     if (player.duration) {
         progress.value = (player.currentTime / player.duration) * 100;
     }
 });
 
-// seek
 progress.addEventListener("input", () => {
     if (player.duration) {
         player.currentTime = (progress.value / 100) * player.duration;
     }
 });
 
-// 🎬 PLAY YOUTUBE VIDEO
 function playVideo(id) {
     document.getElementById("videoPlayer").innerHTML = `
         <iframe width="400" height="250"
