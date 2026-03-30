@@ -3,11 +3,39 @@
 <head>
     <title>Zubeen Garg MP3 Player</title>
 
+    <!-- ✅ Mobile responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         body {
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(180deg, #121212, #000);
+            color: white;
+            margin-left: 200px;
+        }
+
+        /* 🔥 SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            background: #000;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            color: #1db954;
+        }
+
+        .sidebar p {
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .sidebar p:hover {
             color: white;
         }
 
@@ -16,17 +44,10 @@
             padding: 20px;
             text-align: center;
             background: #181818;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
         }
 
         .subtitle {
             color: #aaa;
-            font-size: 14px;
         }
 
         /* SEARCH */
@@ -40,16 +61,14 @@
             padding: 10px;
             border-radius: 20px;
             border: none;
-            outline: none;
         }
 
         .search-box button {
-            padding: 10px 15px;
+            padding: 10px;
             border-radius: 20px;
-            border: none;
             background: #1db954;
+            border: none;
             color: white;
-            cursor: pointer;
         }
 
         /* GRID */
@@ -68,7 +87,6 @@
             width: 160px;
             transition: 0.3s;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
         .card:hover {
@@ -81,27 +99,12 @@
             border-radius: 10px;
         }
 
-        .card p {
-            font-size: 14px;
-        }
-
-        /* VIDEO */
-        #videoPlayer {
-            text-align: center;
-            margin: 20px;
-        }
-
-        iframe {
-            border-radius: 12px;
-        }
-
         /* PLAYER */
         .player {
             position: fixed;
             bottom: 0;
-            width: 100%;
+            width: calc(100% - 200px);
             background: rgba(24,24,24,0.95);
-            backdrop-filter: blur(10px);
             padding: 15px;
             text-align: center;
         }
@@ -113,17 +116,40 @@
             margin: 5px;
             border-radius: 50%;
             color: white;
-            cursor: pointer;
         }
 
         #progress {
             width: 60%;
         }
 
+        #volume {
+            width: 100px;
+        }
+
+        @media(max-width:768px){
+            body {
+                margin-left: 0;
+            }
+            .sidebar {
+                display: none;
+            }
+            .player {
+                width: 100%;
+            }
+        }
+
     </style>
 </head>
 
 <body>
+
+<!-- 🔥 SIDEBAR -->
+<div class="sidebar">
+    <h2>🎧 Zubeen</h2>
+    <p>Home</p>
+    <p>Search</p>
+    <p>Your Library</p>
+</div>
 
 <div class="header">
     <h1>🎧 Zubeen Garg MP3 Player</h1>
@@ -137,10 +163,8 @@
     </form>
 </div>
 
-<!-- VIDEO -->
 <div id="videoPlayer"></div>
 
-<!-- SONGS -->
 <div class="grid">
     {% for song in songs %}
         <div class="card"
@@ -154,7 +178,7 @@
     {% endfor %}
 </div>
 
-<!-- PLAYER -->
+<!-- 🎧 PLAYER -->
 <div class="player">
     <h3 id="nowPlaying">No song playing</h3>
 
@@ -162,9 +186,14 @@
 
     <input type="range" id="progress" value="0">
 
+    <br>
+
+    <!-- 🔊 Volume -->
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+
     <div class="controls">
         <button onclick="prevSong()">⏮</button>
-        <button onclick="togglePlay()">▶️</button>
+        <button onclick="togglePlay()" id="playBtn">▶️</button>
         <button onclick="nextSong()">⏭</button>
     </div>
 </div>
@@ -174,17 +203,25 @@ let songs = {{ songs | tojson }};
 let currentIndex = 0;
 let player = document.getElementById("player");
 let progress = document.getElementById("progress");
+let volume = document.getElementById("volume");
+let playBtn = document.getElementById("playBtn");
 
 function playSong(url, name) {
     currentIndex = songs.indexOf(name);
     player.src = url;
     player.play();
+    playBtn.innerText = "⏸";
     document.getElementById("nowPlaying").innerText = "🎵 " + name;
 }
 
 function togglePlay() {
-    if (player.paused) player.play();
-    else player.pause();
+    if (player.paused) {
+        player.play();
+        playBtn.innerText = "⏸";
+    } else {
+        player.pause();
+        playBtn.innerText = "▶️";
+    }
 }
 
 function nextSong() {
@@ -209,6 +246,11 @@ progress.addEventListener("input", () => {
     if (player.duration) {
         player.currentTime = (progress.value / 100) * player.duration;
     }
+});
+
+/* 🔊 Volume control */
+volume.addEventListener("input", () => {
+    player.volume = volume.value;
 });
 
 function playVideo(id) {
