@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AxomTunes</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0d0d0d;
+            color: white;
+        }
+
+        header {
+            background: #111;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffcc;
+            text-align: center;
+        }
+
+        .search-box {
+            text-align: center;
+            margin: 20px;
+        }
+
+        input {
+            padding: 12px;
+            width: 300px;
+            border-radius: 20px;
+            border: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: none;
+            background: #00ffcc;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .videos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .video {
+            width: 260px;
+            margin: 15px;
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .video:hover {
+            transform: scale(1.05);
+        }
+
+        img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .player {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        iframe {
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>🎧 AxomTunes</header>
+
+<div class="search-box">
+    <form method="POST" action="/search">
+        <input type="text" name="query" placeholder="Search Assamese songs..." required>
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+<!-- 🎬 PLAYER -->
+{% if selected_video %}
+<div class="player">
+    <h3>Now Playing</h3>
+    <iframe width="500" height="280"
+        src="https://www.youtube.com/embed/{{ selected_video }}"
+        allowfullscreen>
+    </iframe>
+</div>
+{% endif %}
+
+<!-- 🎵 RESULTS -->
+<div class="videos">
+    {% for video in videos %}
+        <div class="video">
+            <a href="/play/{{ video.id }}">
+                <img src="{{ video.thumbnail }}">
+            </a>
+            <p>{{ video.title }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>
